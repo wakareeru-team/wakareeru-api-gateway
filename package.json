@@ -8,6 +8,7 @@
     "start": "wrangler dev",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
+    "infer": "node test/infer.mjs",
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {

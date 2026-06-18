@@ -1,0 +1,17 @@
+{
+  "image": {
+    "path": "test/fixtures/train.jpg",
+    "contentType": "image/jpeg",
+    "fileName": "train.jpg"
+  },
+  "topK": 5,
+  "delayMs": 100,
+  "targets": {
+    "local": {
+      "baseUrl": "http://localhost:8787"
+    },
+    "production": {
+      "baseUrl": "https://your-worker.example"
+    }
+  }
+}

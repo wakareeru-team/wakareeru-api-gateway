@@ -54,6 +54,14 @@ curl -X POST "http://localhost:8787/v1/infer" \
   -F "top_k=5"
 ```
 
+Or use the helper script:
+
+```bash
+cp test/infer.config.example.json test/infer.config.json
+npm run infer -- --target local
+npm run infer -- --target production --count 10
+```
+
 HEIF/HEIC and large original photos should be converted or resized by the frontend before upload. The gateway rejects unsupported types and files larger than `MAX_IMAGE_BYTES`.
 
 ## Configuration

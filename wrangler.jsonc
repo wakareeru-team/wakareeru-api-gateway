@@ -31,7 +31,7 @@
 	],
 	"vars": {
 		"API_VERSION": "v1",
-		"GATEWAY_VERSION": "0.1.0",
+		"GATEWAY_VERSION": "0.1.0-alpha.1",
 		"INFERENCE_PROVIDER": "runpod",
 		"INFERENCE_OPERATION_PATH": "/runsync",
 		"INFERENCE_TIMEOUT_MS": "60000",

@@ -3,6 +3,7 @@ import type { AppEnv } from "../types";
 export interface AppConfig {
 	apiVersion: string;
 	gatewayVersion: string;
+	modelVersion: string;
 	inferenceProvider: string;
 	inferenceEndpointUrl: string | null;
 	inferenceOperationPath: string;
@@ -24,7 +25,8 @@ const DEFAULT_IMAGE_TYPES = "image/jpeg,image/png,image/webp";
 export function getConfig(env: AppEnv): AppConfig {
 	return {
 		apiVersion: env.API_VERSION || "v1",
-		gatewayVersion: env.GATEWAY_VERSION || "0.1.0",
+		gatewayVersion: env.GATEWAY_VERSION || "0.1.1",
+		modelVersion: env.MODEL_VERSION || "0.1.1-alpha.1",
 		inferenceProvider: env.INFERENCE_PROVIDER || "runpod",
 		inferenceEndpointUrl: nonEmpty(env.INFERENCE_ENDPOINT_URL),
 		inferenceOperationPath: normalizePath(env.INFERENCE_OPERATION_PATH || "/runsync"),

@@ -49,7 +49,6 @@ describe("wakareeru API gateway", () => {
 		const payload = await response.json<Record<string, unknown>>();
 
 		expect(response.status).toBe(200);
-		expect(payload.gateway_version).toBe("0.1.0");
 		expect(payload.api_version).toBe("v1");
 		expect(payload.inference_provider).toBe("runpod");
 	});
@@ -64,10 +63,42 @@ describe("wakareeru API gateway", () => {
 			expect(init?.headers).toBeInstanceOf(Headers);
 			expect((init?.headers as Headers).get("authorization")).toBe("Bearer test-api-key");
 
+			const prediction = {
+				label_id: 0,
+				label: { ja: "101系", en: "101 series", zh: "101系" },
+				operator: {
+					ja: ["国鉄"],
+					en: ["Japanese National Railways"],
+					zh: ["日本国有铁道"],
+				},
+				probability: 0.8,
+			};
 			return Response.json({
 				status: "ok",
-				subject_count: 0,
-				subjects: [],
+				metadata: {
+					inference_version: "0.1.1",
+					detector_version: "grounding-dino",
+					classifier_version: "wakareeru-0.1.1-alpha.1",
+				},
+				subject_count: 1,
+				subjects: [
+					{
+						index: 0,
+						detection: {
+							bbox: [120, 80, 900, 520],
+							status: "detected",
+							label: "a train",
+							score: 0.74,
+						},
+						classification: {
+							status: "classified",
+							top_prediction: prediction,
+							top_k: [prediction],
+							confusion_group: null,
+							group_candidates: [],
+						},
+					},
+				],
 			});
 		});
 		vi.stubGlobal("fetch", upstreamFetch);

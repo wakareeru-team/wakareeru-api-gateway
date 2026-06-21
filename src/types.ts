@@ -2,6 +2,7 @@ export type AppEnv = Env & {
 	INFERENCE_ENDPOINT_URL?: string;
 	INFERENCE_API_KEY?: string;
 	INFERENCE_OPERATION_PATH?: string;
+	MODEL_VERSION?: string;
 	DEV_TOKENS?: string;
 	ANON_INFER_RATE_LIMITER?: RateLimitBinding;
 	USER_INFER_RATE_LIMITER?: RateLimitBinding;

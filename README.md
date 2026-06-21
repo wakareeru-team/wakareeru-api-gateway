@@ -22,6 +22,18 @@ Returns gateway health:
 
 Returns gateway and configured inference metadata.
 
+```json
+{
+  "gateway_version": "0.1.1",
+  "api_version": "v1",
+  "model_version": "0.1.1-alpha.1",
+  "inference_provider": "runpod",
+  "inference_operation_path": "/runsync",
+  "inference_version_hint": null,
+  "request_id": "..."
+}
+```
+
 ### `POST /v1/infer`
 
 Accepts `multipart/form-data`:
@@ -45,6 +57,68 @@ The gateway converts the image bytes to base64 and forwards this payload to the 
   }
 }
 ```
+
+The inference response is passed through unchanged. Classification labels and operators are localized for Japanese, English, and Chinese. Each operator language is always an array, including when there is only one operator.
+
+```json
+{
+  "status": "ok",
+  "metadata": {
+    "inference_version": "0.1.1",
+    "detector_version": "grounding-dino",
+    "classifier_version": "wakareeru-0.1.1-alpha.1"
+  },
+  "subject_count": 1,
+  "subjects": [
+    {
+      "index": 0,
+      "detection": {
+        "bbox": [120, 80, 900, 520],
+        "status": "detected",
+        "label": "a train",
+        "score": 0.74
+      },
+      "classification": {
+        "status": "classified",
+        "top_prediction": {
+          "label_id": 0,
+          "label": {
+            "ja": "101系",
+            "en": "101 series",
+            "zh": "101系"
+          },
+          "operator": {
+            "ja": ["国鉄"],
+            "en": ["Japanese National Railways"],
+            "zh": ["日本国有铁道"]
+          },
+          "probability": 0.8
+        },
+        "top_k": [
+          {
+            "label_id": 0,
+            "label": {
+              "ja": "101系",
+              "en": "101 series",
+              "zh": "101系"
+            },
+            "operator": {
+              "ja": ["国鉄"],
+              "en": ["Japanese National Railways"],
+              "zh": ["日本国有铁道"]
+            },
+            "probability": 0.8
+          }
+        ],
+        "confusion_group": null,
+        "group_candidates": []
+      }
+    }
+  ]
+}
+```
+
+Top-level response statuses are `ok`, `no_detection`, and `error`. Detection statuses are `detected` and `fallback_whole_image`; classification statuses are `classified`, `low_confidence`, and `no_prediction`.
 
 Example:
 

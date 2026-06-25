@@ -31,7 +31,7 @@
 	],
 	"vars": {
 		"API_VERSION": "v1",
-		"GATEWAY_VERSION": "0.1.1",
+		"GATEWAY_VERSION": "0.1.2",
 		"INFERENCE_PROVIDER": "runpod",
 		"INFERENCE_OPERATION_PATH": "/runsync",
 		"ALLOWED_IMAGE_TYPES": "image/jpeg,image/png,image/webp",

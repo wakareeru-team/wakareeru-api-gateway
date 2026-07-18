@@ -1,5 +1,5 @@
 import type { AppEnv } from "../types";
-import type { RuntimeConfigValues } from "./kv";
+import type { JsonValue, RuntimeConfigValues } from "./kv";
 
 export interface AppConfig {
 	apiVersion: string;
@@ -17,6 +17,7 @@ export interface AppConfig {
 	enableAppleAuth: boolean;
 	devTokens: Set<string>;
 	allowedOrigins: string[];
+	announcement?: JsonValue;
 }
 
 const DEFAULT_MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -46,6 +47,7 @@ export function getConfig(env: AppEnv, runtimeConfig: RuntimeConfigValues = {}):
 		enableAppleAuth: bool(env.ENABLE_APPLE_AUTH),
 		devTokens: csvSet(env.DEV_TOKENS || ""),
 		allowedOrigins: csvList(readOptional(env, "ALLOWED_ORIGINS") || "*"),
+		announcement: runtimeConfig.announcement,
 	};
 }
 

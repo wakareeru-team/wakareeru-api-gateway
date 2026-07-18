@@ -34,6 +34,47 @@ Returns gateway and configured inference metadata.
 }
 ```
 
+### `GET /announce`
+
+Returns the current production announcement document stored in KV. The JSON is passed through
+without an additional response wrapper.
+
+```json
+{
+  "schemaVersion": 1,
+  "announcements": [
+    {
+      "id": "alpha-welcome-20260718",
+      "priority": 100,
+      "enabled": true,
+      "title": {
+        "zh-Hans": "欢迎参加 Alpha 测试",
+        "en": "Welcome to the Alpha Test",
+        "ja": "アルファテストへようこそ"
+      },
+      "body": {
+        "zh-Hans": "Wakareeru 目前处于早期测试阶段，识别结果可能不准确。",
+        "en": "Wakareeru is currently in an early testing stage. Recognition results may be inaccurate.",
+        "ja": "Wakareeruは現在初期テスト段階です。認識結果が正確でない場合があります。"
+      }
+    }
+  ]
+}
+```
+
+Payload conventions:
+
+- `schemaVersion` identifies the document format. Clients should ignore unsupported versions.
+- `id` is a stable, unique announcement identifier that clients may use for dismissal state.
+- `enabled: false` means the client should not display the announcement.
+- Higher `priority` values should be displayed first.
+- `title` and `body` use language tags such as `zh-Hans`, `en`, and `ja`.
+
+The gateway does not filter, sort, or localize announcements; those fields are delivered exactly as
+stored so clients can apply their own display policy.
+
+Returns `404 announcement_not_found` when the KV key is missing or empty.
+
 ### `POST /v1/infer`
 
 Accepts `multipart/form-data`:
@@ -148,7 +189,15 @@ Runtime inference settings are read from the `wakareeru_config` KV namespace:
 MODEL_VERSION
 INFERENCE_TIMEOUT_MS
 MAX_IMAGE_BYTES
+announcement:production
 ```
+
+`announcement:production` must contain valid JSON using the announcement document shape shown
+above. The gateway currently validates JSON syntax and value types, but does not enforce the
+announcement fields. Invalid JSON is ignored and logged as a runtime configuration error.
+
+Workers KV is eventually consistent, so an announcement update may take up to 60 seconds to become
+visible in every location. See [KV read consistency](https://developers.cloudflare.com/kv/api/read-key-value-pairs/).
 
 Production secrets should be configured in Cloudflare Dashboard with matching names:
 

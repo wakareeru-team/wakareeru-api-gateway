@@ -2,6 +2,7 @@ import { authenticate } from "./auth/authenticator";
 import { getConfig } from "./config/env";
 import { applyCors, corsPreflight } from "./http/cors";
 import { ApiError, errorResponse } from "./http/errors";
+import { announceRoute } from "./routes/announce";
 import { healthRoute } from "./routes/health";
 import { inferRoute } from "./routes/infer";
 import { versionRoute } from "./routes/version";
@@ -31,6 +32,8 @@ export async function handleRequest(
 			response = healthRoute(context);
 		} else if (request.method === "GET" && url.pathname === "/version") {
 			response = versionRoute(config, context);
+		} else if (request.method === "GET" && url.pathname === "/announce") {
+			response = announceRoute(config);
 		} else if (request.method === "POST" && url.pathname === "/v1/infer") {
 			response = await inferRoute(request, env, config, principal, context);
 		} else {

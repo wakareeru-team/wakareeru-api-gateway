@@ -78,6 +78,48 @@ describe("wakareeru API gateway", () => {
 		expect(payload.model_version).toBe("0.3.0-alpha.1");
 	});
 
+	it("returns the production announcement parsed from KV config", async () => {
+		const announcement = {
+			schemaVersion: 1,
+			announcements: [
+				{
+					id: "alpha-welcome-20260718",
+					priority: 100,
+					enabled: true,
+					title: {
+						"zh-Hans": "欢迎参加 Alpha 测试",
+						en: "Welcome to the Alpha Test",
+						ja: "アルファテストへようこそ",
+					},
+					body: {
+						"zh-Hans": "Wakareeru 目前处于早期测试阶段，识别结果可能不准确。",
+						en: "Wakareeru is currently in an early testing stage. Recognition results may be inaccurate.",
+						ja: "Wakareeruは現在初期テスト段階です。認識結果が正確でない場合があります。",
+					},
+				},
+			],
+		};
+		const response = await fetchWorker(new IncomingRequest("https://gateway.example.test/announce"), {
+			wakareeru_config: configKv({
+				"announcement:production": JSON.stringify(announcement),
+			}) as KVNamespace,
+		});
+		const payload = await response.json<Record<string, unknown>>();
+
+		expect(response.status).toBe(200);
+		expect(payload).toEqual(announcement);
+	});
+
+	it("returns not found when no production announcement is configured", async () => {
+		const response = await fetchWorker(
+			new IncomingRequest("https://gateway.example.test/announce"),
+		);
+		const payload = await response.json<{ error: { code: string } }>();
+
+		expect(response.status).toBe(404);
+		expect(payload.error.code).toBe("announcement_not_found");
+	});
+
 	it("accepts multipart image and forwards base64 payload to inference backend", async () => {
 		const upstreamFetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
 			expect(String(url)).toBe("https://inference.example.test/v2/endpoint-id/runsync");

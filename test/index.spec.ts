@@ -120,6 +120,45 @@ describe("wakareeru API gateway", () => {
 		expect(payload.error.code).toBe("announcement_not_found");
 	});
 
+	it("returns the gallery image assembled from KV config", async () => {
+		const description = {
+			"zh-CN": "夏日田野中行驶的列车",
+			"ja-JP": "夏の田園を走る列車",
+			en: "A train running through the summer countryside",
+		};
+		const response = await fetchWorker(new IncomingRequest("https://gateway.example.test/gallery"), {
+			wakareeru_config: configKv({
+				GALLERY_IMAGE_ID: "summer-gallery-2026-07-v2",
+				GALLERY_IMAGE_URL: "https://media.wakareeru.com/gallery/2026-summer.v2.webp",
+				GALLERY_IMAGE_DESCRIPTION: JSON.stringify(description),
+			}) as KVNamespace,
+		});
+		const payload = await response.json<Record<string, unknown>>();
+
+		expect(response.status).toBe(200);
+		expect(payload).toEqual({
+			schemaVersion: 1,
+			image: {
+				id: "summer-gallery-2026-07-v2",
+				url: "https://media.wakareeru.com/gallery/2026-summer.v2.webp",
+				description,
+			},
+		});
+	});
+
+	it("returns not found when the gallery KV config is incomplete", async () => {
+		const response = await fetchWorker(new IncomingRequest("https://gateway.example.test/gallery"), {
+			wakareeru_config: configKv({
+				GALLERY_IMAGE_ID: "summer-gallery-2026-07-v2",
+				GALLERY_IMAGE_URL: "https://media.wakareeru.com/gallery/2026-summer.v2.webp",
+			}) as KVNamespace,
+		});
+		const payload = await response.json<{ error: { code: string } }>();
+
+		expect(response.status).toBe(404);
+		expect(payload.error.code).toBe("gallery_not_found");
+	});
+
 	it("accepts multipart image and forwards base64 payload to inference backend", async () => {
 		const upstreamFetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
 			expect(String(url)).toBe("https://inference.example.test/v2/endpoint-id/runsync");

@@ -75,6 +75,28 @@ stored so clients can apply their own display policy.
 
 Returns `404 announcement_not_found` when the KV key is missing or empty.
 
+### `GET /gallery`
+
+Returns one gallery image assembled from three KV values. `schemaVersion` and the response shape are
+owned by the gateway; the image ID, URL, and localized description are runtime configuration.
+
+```json
+{
+  "schemaVersion": 1,
+  "image": {
+    "id": "summer-gallery-2026-07-v2",
+    "url": "https://media.wakareeru.com/gallery/2026-summer.v2.webp",
+    "description": {
+      "zh-CN": "夏日田野中行驶的列车",
+      "ja-JP": "夏の田園を走る列車",
+      "en": "A train running through the summer countryside"
+    }
+  }
+}
+```
+
+Returns `404 gallery_not_found` when any required gallery KV value is missing or invalid.
+
 ### `POST /v1/infer`
 
 Accepts `multipart/form-data`:
@@ -190,14 +212,30 @@ MODEL_VERSION
 INFERENCE_TIMEOUT_MS
 MAX_IMAGE_BYTES
 announcement:production
+GALLERY_IMAGE_ID
+GALLERY_IMAGE_URL
+GALLERY_IMAGE_DESCRIPTION
 ```
 
 `announcement:production` must contain valid JSON using the announcement document shape shown
 above. The gateway currently validates JSON syntax and value types, but does not enforce the
 announcement fields. Invalid JSON is ignored and logged as a runtime configuration error.
 
+`GALLERY_IMAGE_ID` and `GALLERY_IMAGE_URL` must be non-empty strings.
+`GALLERY_IMAGE_DESCRIPTION` must be a JSON object containing non-empty `zh-CN`, `ja-JP`, and `en`
+strings. For example:
+
+```json
+{
+  "zh-CN": "夏日田野中行驶的列车",
+  "ja-JP": "夏の田園を走る列車",
+  "en": "A train running through the summer countryside"
+}
+```
+
 Workers KV is eventually consistent, so an announcement update may take up to 60 seconds to become
-visible in every location. See [KV read consistency](https://developers.cloudflare.com/kv/api/read-key-value-pairs/).
+visible in every location. Gallery configuration has the same propagation behavior. See
+[KV read consistency](https://developers.cloudflare.com/kv/api/read-key-value-pairs/).
 
 Production secrets should be configured in Cloudflare Dashboard with matching names:
 

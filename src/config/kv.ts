@@ -4,6 +4,8 @@ export interface RuntimeConfigValues {
 	modelVersion?: string;
 	inferenceTimeoutMs?: string;
 	maxImageBytes?: string;
+	detectionThreshold?: number;
+	detectionFallbackToWholeImage?: boolean;
 	announcement?: JsonValue;
 	galleryImageId?: string;
 	galleryImageUrl?: string;
@@ -22,10 +24,14 @@ const ANNOUNCEMENT_KEY = "announcement:production";
 const GALLERY_IMAGE_ID_KEY = "GALLERY_IMAGE_ID";
 const GALLERY_IMAGE_URL_KEY = "GALLERY_IMAGE_URL";
 const GALLERY_IMAGE_DESCRIPTION_KEY = "GALLERY_IMAGE_DESCRIPTION";
+const DETECTION_THRESHOLD_KEY = "detection_threshold";
+const DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY = "detection_fallback_to_whole_image";
 const CONFIG_KEYS = [
 	"MODEL_VERSION",
 	"INFERENCE_TIMEOUT_MS",
 	"MAX_IMAGE_BYTES",
+	DETECTION_THRESHOLD_KEY,
+	DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY,
 	ANNOUNCEMENT_KEY,
 	GALLERY_IMAGE_ID_KEY,
 	GALLERY_IMAGE_URL_KEY,
@@ -43,6 +49,14 @@ export async function loadRuntimeConfig(env: AppEnv): Promise<RuntimeConfigValue
 		modelVersion: nonEmpty(values.get("MODEL_VERSION")),
 		inferenceTimeoutMs: nonEmpty(values.get("INFERENCE_TIMEOUT_MS")),
 		maxImageBytes: nonEmpty(values.get("MAX_IMAGE_BYTES")),
+		detectionThreshold: parseUnitInterval(
+			values.get(DETECTION_THRESHOLD_KEY),
+			DETECTION_THRESHOLD_KEY,
+		),
+		detectionFallbackToWholeImage: parseBoolean(
+			values.get(DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY),
+			DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY,
+		),
 		announcement: parseJson(values.get(ANNOUNCEMENT_KEY), ANNOUNCEMENT_KEY),
 		galleryImageId: nonEmpty(values.get(GALLERY_IMAGE_ID_KEY)),
 		galleryImageUrl: nonEmpty(values.get(GALLERY_IMAGE_URL_KEY)),
@@ -50,6 +64,50 @@ export async function loadRuntimeConfig(env: AppEnv): Promise<RuntimeConfigValue
 			values.get(GALLERY_IMAGE_DESCRIPTION_KEY),
 		),
 	};
+}
+
+function parseUnitInterval(
+	value: string | null | undefined,
+	key: string,
+): number | undefined {
+	const normalized = nonEmpty(value);
+	if (normalized === undefined) {
+		return undefined;
+	}
+	const parsed = Number(normalized);
+	if (Number.isFinite(parsed) && parsed >= 0 && parsed <= 1) {
+		return parsed;
+	}
+	console.error(
+		JSON.stringify({
+			message: "Runtime configuration must be a number between 0 and 1",
+			key,
+		}),
+	);
+	return undefined;
+}
+
+function parseBoolean(
+	value: string | null | undefined,
+	key: string,
+): boolean | undefined {
+	const normalized = nonEmpty(value)?.toLowerCase();
+	if (normalized === undefined) {
+		return undefined;
+	}
+	if (normalized === "true") {
+		return true;
+	}
+	if (normalized === "false") {
+		return false;
+	}
+	console.error(
+		JSON.stringify({
+			message: "Runtime configuration must be true or false",
+			key,
+		}),
+	);
+	return undefined;
 }
 
 function parseGalleryImageDescription(

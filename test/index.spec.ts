@@ -221,6 +221,53 @@ describe("wakareeru API gateway", () => {
 		expect(upstreamFetch).toHaveBeenCalledOnce();
 	});
 
+	it("forwards detection overrides from KV to the inference backend", async () => {
+		const upstreamFetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+			const body = JSON.parse(String(init?.body));
+			expect(body.input.inference_options).toEqual({
+				detection_threshold: 0.3,
+				fallback_to_whole_image: false,
+			});
+			return Response.json({ status: "no_detection", subjects: [] });
+		});
+		vi.stubGlobal("fetch", upstreamFetch);
+
+		const form = new FormData();
+		form.set("image", new File([new Uint8Array([1, 2, 3])], "train.jpg", { type: "image/jpeg" }));
+
+		const response = await fetchWorker(multipartRequest(form), {
+			wakareeru_config: configKv({
+				detection_threshold: "0.3",
+				detection_fallback_to_whole_image: "false",
+			}) as KVNamespace,
+		});
+
+		expect(response.status).toBe(200);
+		expect(upstreamFetch).toHaveBeenCalledOnce();
+	});
+
+	it("omits invalid detection overrides from the inference request", async () => {
+		const upstreamFetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+			const body = JSON.parse(String(init?.body));
+			expect(body.input).not.toHaveProperty("inference_options");
+			return Response.json({ status: "ok", subjects: [] });
+		});
+		vi.stubGlobal("fetch", upstreamFetch);
+
+		const form = new FormData();
+		form.set("image", new File([new Uint8Array([1])], "train.jpg", { type: "image/jpeg" }));
+
+		const response = await fetchWorker(multipartRequest(form), {
+			wakareeru_config: configKv({
+				detection_threshold: "1.1",
+				detection_fallback_to_whole_image: "sometimes",
+			}) as KVNamespace,
+		});
+
+		expect(response.status).toBe(200);
+		expect(upstreamFetch).toHaveBeenCalledOnce();
+	});
+
 	it("rejects unsupported image types before calling upstream", async () => {
 		const upstreamFetch = vi.fn();
 		vi.stubGlobal("fetch", upstreamFetch);

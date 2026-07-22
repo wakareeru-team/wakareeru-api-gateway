@@ -15,11 +15,21 @@ export async function infer(
 	if (!config.inferenceEndpointUrl) {
 		throw new ApiError(503, "inference_not_configured", "Inference endpoint is not configured.");
 	}
+	const inferenceOptions: NonNullable<InferenceRequest["input"]["inference_options"]> = {};
+	if (config.detectionThreshold !== undefined) {
+		inferenceOptions.detection_threshold = config.detectionThreshold;
+	}
+	if (config.detectionFallbackToWholeImage !== undefined) {
+		inferenceOptions.fallback_to_whole_image = config.detectionFallbackToWholeImage;
+	}
 
 	const payload: InferenceRequest = {
 		input: {
 			image_base64: image.base64,
 			...(topK === null ? {} : { top_k: topK }),
+			...(Object.keys(inferenceOptions).length === 0
+				? {}
+				: { inference_options: inferenceOptions }),
 		},
 		request_context: {
 			request_id: context.requestId,

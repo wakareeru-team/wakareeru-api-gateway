@@ -2,6 +2,10 @@ export interface InferenceRequest {
 	input: {
 		image_base64: string;
 		top_k?: number;
+		inference_options?: {
+			detection_threshold?: number;
+			fallback_to_whole_image?: boolean;
+		};
 	};
 	request_context: {
 		request_id: string;

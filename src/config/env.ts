@@ -11,6 +11,8 @@ export interface AppConfig {
 	inferenceApiKey: string | null;
 	inferenceTimeoutMs: number;
 	inferenceVersionHint: string | null;
+	detectionThreshold?: number;
+	detectionFallbackToWholeImage?: boolean;
 	maxImageBytes: number;
 	allowedImageTypes: Set<string>;
 	enableDevTokenAuth: boolean;
@@ -41,6 +43,8 @@ export function getConfig(env: AppEnv, runtimeConfig: RuntimeConfigValues = {}):
 			DEFAULT_TIMEOUT_MS,
 		),
 		inferenceVersionHint: nonEmpty(readOptional(env, "INFERENCE_VERSION_HINT")),
+		detectionThreshold: runtimeConfig.detectionThreshold,
+		detectionFallbackToWholeImage: runtimeConfig.detectionFallbackToWholeImage,
 		maxImageBytes: positiveInt(
 			runtimeConfig.maxImageBytes || env.MAX_IMAGE_BYTES,
 			DEFAULT_MAX_IMAGE_BYTES,

@@ -1,5 +1,5 @@
 import type { AppEnv } from "../types";
-import type { JsonValue, RuntimeConfigValues } from "./kv";
+import type { GalleryImageDescription, JsonValue, RuntimeConfigValues } from "./kv";
 
 export interface AppConfig {
 	apiVersion: string;
@@ -18,6 +18,9 @@ export interface AppConfig {
 	devTokens: Set<string>;
 	allowedOrigins: string[];
 	announcement?: JsonValue;
+	galleryImageId: string | null;
+	galleryImageUrl: string | null;
+	galleryImageDescription: GalleryImageDescription | null;
 }
 
 const DEFAULT_MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -48,6 +51,9 @@ export function getConfig(env: AppEnv, runtimeConfig: RuntimeConfigValues = {}):
 		devTokens: csvSet(env.DEV_TOKENS || ""),
 		allowedOrigins: csvList(readOptional(env, "ALLOWED_ORIGINS") || "*"),
 		announcement: runtimeConfig.announcement,
+		galleryImageId: nonEmpty(runtimeConfig.galleryImageId),
+		galleryImageUrl: nonEmpty(runtimeConfig.galleryImageUrl),
+		galleryImageDescription: runtimeConfig.galleryImageDescription ?? null,
 	};
 }
 

@@ -19,6 +19,9 @@ export async function infer(
 	if (config.detectionThreshold !== undefined) {
 		inferenceOptions.detection_threshold = config.detectionThreshold;
 	}
+	if (config.nmsIouThreshold !== undefined) {
+		inferenceOptions.nms_iou_threshold = config.nmsIouThreshold;
+	}
 	if (config.detectionFallbackToWholeImage !== undefined) {
 		inferenceOptions.fallback_to_whole_image = config.detectionFallbackToWholeImage;
 	}

@@ -12,6 +12,7 @@ export interface AppConfig {
 	inferenceTimeoutMs: number;
 	inferenceVersionHint: string | null;
 	detectionThreshold?: number;
+	nmsIouThreshold?: number;
 	detectionFallbackToWholeImage?: boolean;
 	maxImageBytes: number;
 	allowedImageTypes: Set<string>;
@@ -44,6 +45,7 @@ export function getConfig(env: AppEnv, runtimeConfig: RuntimeConfigValues = {}):
 		),
 		inferenceVersionHint: nonEmpty(readOptional(env, "INFERENCE_VERSION_HINT")),
 		detectionThreshold: runtimeConfig.detectionThreshold,
+		nmsIouThreshold: runtimeConfig.nmsIouThreshold,
 		detectionFallbackToWholeImage: runtimeConfig.detectionFallbackToWholeImage,
 		maxImageBytes: positiveInt(
 			runtimeConfig.maxImageBytes || env.MAX_IMAGE_BYTES,

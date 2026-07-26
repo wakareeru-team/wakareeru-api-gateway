@@ -113,6 +113,7 @@ The gateway converts the image bytes to base64 and forwards this payload to the 
     "top_k": 5,
     "inference_options": {
       "detection_threshold": 0.3,
+      "nms_iou_threshold": 0.35,
       "fallback_to_whole_image": false
     }
   },
@@ -215,7 +216,8 @@ Runtime inference settings are read from the `wakareeru_config` KV namespace:
 MODEL_VERSION
 INFERENCE_TIMEOUT_MS
 MAX_IMAGE_BYTES
-detection_threshold
+detection_threshold:production
+IoU_threshold:production
 detection_fallback_to_whole_image
 announcement:production
 GALLERY_IMAGE_ID
@@ -223,9 +225,11 @@ GALLERY_IMAGE_URL
 GALLERY_IMAGE_DESCRIPTION
 ```
 
-`detection_threshold` must be a number from `0` to `1`. The gateway forwards it as
+`detection_threshold:production` must be a number from `0` to `1`. The gateway forwards it as
 `input.inference_options.detection_threshold`, where it overrides both Grounding-DINO box and text
-thresholds for that request. `detection_fallback_to_whole_image` must be `true` or `false` and is
+thresholds for that request. `IoU_threshold:production` must also be a number from `0` to `1` and is
+forwarded as `input.inference_options.nms_iou_threshold`, where it overrides NMS IoU threshold for
+that request. `detection_fallback_to_whole_image` must be `true` or `false` and is
 forwarded as `input.inference_options.fallback_to_whole_image`. Missing or invalid values are omitted,
 so the inference service keeps its configured defaults. Like the other KV-backed settings, updates are
 eventually consistent across Cloudflare locations.

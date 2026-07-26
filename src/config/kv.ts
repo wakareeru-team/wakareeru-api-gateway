@@ -5,6 +5,7 @@ export interface RuntimeConfigValues {
 	inferenceTimeoutMs?: string;
 	maxImageBytes?: string;
 	detectionThreshold?: number;
+	nmsIouThreshold?: number;
 	detectionFallbackToWholeImage?: boolean;
 	announcement?: JsonValue;
 	galleryImageId?: string;
@@ -24,13 +25,15 @@ const ANNOUNCEMENT_KEY = "announcement:production";
 const GALLERY_IMAGE_ID_KEY = "GALLERY_IMAGE_ID";
 const GALLERY_IMAGE_URL_KEY = "GALLERY_IMAGE_URL";
 const GALLERY_IMAGE_DESCRIPTION_KEY = "GALLERY_IMAGE_DESCRIPTION";
-const DETECTION_THRESHOLD_KEY = "detection_threshold";
+const DETECTION_THRESHOLD_KEY = "detection_threshold:production";
+const NMS_IOU_THRESHOLD_KEY = "IoU_threshold:production";
 const DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY = "detection_fallback_to_whole_image";
 const CONFIG_KEYS = [
 	"MODEL_VERSION",
 	"INFERENCE_TIMEOUT_MS",
 	"MAX_IMAGE_BYTES",
 	DETECTION_THRESHOLD_KEY,
+	NMS_IOU_THRESHOLD_KEY,
 	DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY,
 	ANNOUNCEMENT_KEY,
 	GALLERY_IMAGE_ID_KEY,
@@ -52,6 +55,10 @@ export async function loadRuntimeConfig(env: AppEnv): Promise<RuntimeConfigValue
 		detectionThreshold: parseUnitInterval(
 			values.get(DETECTION_THRESHOLD_KEY),
 			DETECTION_THRESHOLD_KEY,
+		),
+		nmsIouThreshold: parseUnitInterval(
+			values.get(NMS_IOU_THRESHOLD_KEY),
+			NMS_IOU_THRESHOLD_KEY,
 		),
 		detectionFallbackToWholeImage: parseBoolean(
 			values.get(DETECTION_FALLBACK_TO_WHOLE_IMAGE_KEY),

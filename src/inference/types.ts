@@ -4,6 +4,7 @@ export interface InferenceRequest {
 		top_k?: number;
 		inference_options?: {
 			detection_threshold?: number;
+			nms_iou_threshold?: number;
 			fallback_to_whole_image?: boolean;
 		};
 	};

@@ -226,6 +226,7 @@ describe("wakareeru API gateway", () => {
 			const body = JSON.parse(String(init?.body));
 			expect(body.input.inference_options).toEqual({
 				detection_threshold: 0.3,
+				nms_iou_threshold: 0.35,
 				fallback_to_whole_image: false,
 			});
 			return Response.json({ status: "no_detection", subjects: [] });
@@ -237,7 +238,8 @@ describe("wakareeru API gateway", () => {
 
 		const response = await fetchWorker(multipartRequest(form), {
 			wakareeru_config: configKv({
-				detection_threshold: "0.3",
+				"detection_threshold:production": "0.3",
+				"IoU_threshold:production": "0.35",
 				detection_fallback_to_whole_image: "false",
 			}) as KVNamespace,
 		});
@@ -259,7 +261,8 @@ describe("wakareeru API gateway", () => {
 
 		const response = await fetchWorker(multipartRequest(form), {
 			wakareeru_config: configKv({
-				detection_threshold: "1.1",
+				"detection_threshold:production": "1.1",
+				"IoU_threshold:production": "-0.1",
 				detection_fallback_to_whole_image: "sometimes",
 			}) as KVNamespace,
 		});
